@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'com.frauddetection'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JavaFX
+    implementation 'org.openjfx:javafx-controls:19'
+    implementation 'org.openjfx:javafx-fxml:19'
+
+    // Kafka
+    implementation 'org.apache.kafka:kafka-clients:3.5.1'
+
+    // JSON Processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'ch.qos.logback:logback-classic:1.4.8'
+
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+javafx {
+    version = '19'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+application {
+    mainClass = 'com.frauddetection.ui.FraudDetectionApp'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Task to run the transaction simulator
+tasks.register('runTransactionSimulator', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.frauddetection.simulator.AlpacaTransactionSimulator'
+}
+
+// Task to run the fraud detection service
+tasks.register('runFraudDetectionService', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.frauddetection.service.FraudDetectionService'
+}
+
+// Task to run the JavaFX UI
+tasks.register('runUI', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.frauddetection.ui.FraudDetectionApp'
+}

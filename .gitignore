@@ -1,0 +1,102 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# IDE Files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# JavaFX
+*.fxml.bak
+
+# Maven (if ever used)
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Kafka Downloads & Runtime
+kafka_*/
+kafka-logs/
+zookeeper/
+*.pid
+
+# Database files (if any)
+*.db
+*.sqlite
+*.sqlite3
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Windows
+*.lnk
+
+# Temporary files
+*.temp
+*.cache
+*.backup
+
+# Application specific
+app-processes.json
+fraud-detection-*.log
+
+# JVM crash logs
+hs_err_pid*.log
+
+# Build distributions
+*.tar
+*.zip
+dist/
+out/
+
+# Runtime directories that get created
+scripts/kafka_*/
+scripts/logs/
+
+# Test results
+test-results/
+reports/
