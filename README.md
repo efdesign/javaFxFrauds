@@ -6,7 +6,7 @@ A distributed fraud detection system that simulates Alpaca stock transactions an
 
 https://github.com/efdesign/javaFxFrauds/blob/master/docs/fxRealtime.mp4
 
-*Watch the system in action: real-time transaction processing, fraud detection, and live UI updates*
+_Watch the system in action: real-time transaction processing, fraud detection, and live UI updates_
 
 ## Architecture
 
@@ -21,26 +21,50 @@ Alpaca Simulator → Kafka (transactions) → Fraud Detection Service → Kafka 
 3. **JavaFX UI**: Real-time display of transactions and alerts
 4. **Kafka**: Message broker for distributed communication
 
-## Quick Start
+## 🚀 Quick Start
 
-1. Start Kafka: `.\scripts\start-kafka.ps1`
-2. Run components: `.\scripts\run-all.ps1`
+**One-command system startup:**
 
-## Manual Start
+```powershell
+.\scripts\start.ps1
+```
 
-```bash
-# Terminal 1: Start Kafka
-.\scripts\start-kafka.ps1
+**To stop the system:**
 
-# Terminal 2: Start Fraud Detection Service
+```powershell
+.\scripts\stop.ps1
+```
+
+The start script will:
+
+- Build the project with a fresh Gradle daemon
+- Start Kafka 4.1.0 in KRaft mode (no ZooKeeper needed)
+- Create required Kafka topics
+- Launch all services in separate PowerShell windows
+- Display system status and log locations
+
+## ⚙️ Manual Development Commands (Optional)
+
+If you need to run individual components for development:
+
+```powershell
+# Build project
+.\gradlew build
+
+# Run individual services (each in separate terminal)
 .\gradlew runFraudDetectionService
-
-# Terminal 3: Start Transaction Simulator
 .\gradlew runTransactionSimulator
-
-# Terminal 4: Start JavaFX UI
 .\gradlew runUI
 ```
+
+**Note**: The `start.ps1` script is the recommended way to run the complete system.
+
+## System Requirements
+
+- **Windows 10/11** with PowerShell
+- **Java 17+**
+- **Apache Kafka 4.1.0** (included)
+- **Gradle** (wrapper included)
 
 ## Fraud Detection Rules
 
@@ -48,6 +72,24 @@ Alpaca Simulator → Kafka (transactions) → Fraud Detection Service → Kafka 
 - Rapid successive trades from same account
 - Unusual trading hours (outside 9:30 AM - 4:00 PM EST)
 - Price manipulation patterns
+
+## 🔧 Troubleshooting
+
+**System Logs:**
+
+- `logs\fraud-detection.log` - Application logs
+- `logs\kafka.log` - Kafka server logs
+- `logs\kafka.err` - Kafka error logs
+
+**Common Issues:**
+
+- **Build failures**: Run `.\gradlew clean build`
+- **Kafka connection issues**: Check `logs\kafka.log` for errors
+- **Port conflicts**: Kafka uses port 9092, make sure it's available
+- **JavaFX issues**: Ensure Java 17+ is installed
+
+**System Status:**
+The start script shows component status and process IDs. Each service runs in its own PowerShell window for easy monitoring.
 
 ## 📁 Documentation
 
