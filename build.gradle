@@ -40,6 +40,10 @@ javafx {
 
 application {
     mainClass = 'com.frauddetection.ui.FraudDetectionApp'
+    applicationDefaultJvmArgs = [
+        '--add-modules', 'javafx.controls,javafx.fxml',
+        '--add-exports', 'javafx.base/com.sun.javafx.runtime=ALL-UNNAMED'
+    ]
 }
 
 test {
@@ -58,8 +62,12 @@ tasks.register('runFraudDetectionService', JavaExec) {
     mainClass = 'com.frauddetection.service.FraudDetectionService'
 }
 
-// Task to run the JavaFX UI
+// Task to run the JavaFX UI with proper JavaFX runtime
 tasks.register('runUI', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.frauddetection.ui.FraudDetectionApp'
+    jvmArgs = [
+        '--module-path', configurations.runtimeClasspath.asPath,
+        '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
 }

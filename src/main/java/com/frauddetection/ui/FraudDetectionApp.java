@@ -311,17 +311,24 @@ public class FraudDetectionApp extends Application {
     }
 
     private void setupKafkaConsumers() {
+        logger.info("Setting up Kafka consumers for UI");
+        
         // Transaction consumer
+        logger.info("Creating transaction consumer with group: ui-transactions");
         transactionConsumer = new KafkaConsumer<>(KafkaConfig.getConsumerProps("ui-transactions"));
         transactionConsumer.subscribe(Arrays.asList(KafkaConfig.TRANSACTIONS_TOPIC));
+        logger.info("Subscribed to topic: {}", KafkaConfig.TRANSACTIONS_TOPIC);
 
         // Alert consumer
+        logger.info("Creating alert consumer with group: ui-alerts");
         alertConsumer = new KafkaConsumer<>(KafkaConfig.getConsumerProps("ui-alerts"));
         alertConsumer.subscribe(Arrays.asList(KafkaConfig.FRAUD_ALERTS_TOPIC));
+        logger.info("Subscribed to topic: {}", KafkaConfig.FRAUD_ALERTS_TOPIC);
 
         // Start Kafka polling in background
         kafkaExecutor = Executors.newFixedThreadPool(2);
 
+        logger.info("Starting Kafka consumer threads");
         kafkaExecutor.submit(this::consumeTransactions);
         kafkaExecutor.submit(this::consumeAlerts);
 
@@ -329,36 +336,65 @@ public class FraudDetectionApp extends Application {
             statusLabel.setText("Running");
             statusLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #2ecc71;");
         });
+        
+        logger.info("Kafka consumers setup completed");
     }
 
     private void consumeTransactions() {
+        logger.info("Starting transaction consumer thread");
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                ConsumerRecords<String, String> records = transactionConsumer.poll(java.time.Duration.ofMillis(1000));
+                try {
+                    ConsumerRecords<String, String> records = transactionConsumer.poll(java.time.Duration.ofMillis(1000));
 
-                for (ConsumerRecord<String, String> record : records) {
+                    if (!records.isEmpty()) {
+                        logger.info("Received {} transaction records from Kafka", records.count());
+                    }
+
+                    for (ConsumerRecord<String, String> record : records) {
+                        try {
+                            logger.debug("Processing transaction: {}", record.value());
+                            Transaction transaction = objectMapper.readValue(record.value(), Transaction.class);
+
+                            Platform.runLater(() -> {
+                                TransactionDisplayModel displayModel = new TransactionDisplayModel(transaction);
+                                transactions.add(0, displayModel); // Add at top
+
+                                // Keep only last 100 transactions
+                                if (transactions.size() > 100) {
+                                    transactions.remove(transactions.size() - 1);
+                                }
+
+                                transactionCountLabel.setText("Transactions: " + transactionCount.incrementAndGet());
+                                logger.debug("Updated UI with transaction: {}", transaction.getTransactionId());
+                            });
+
+                        } catch (Exception e) {
+                            logger.error("Error parsing transaction: {}", e.getMessage(), e);
+                        }
+                    }
+                } catch (org.apache.kafka.common.errors.InterruptException e) {
+                    logger.info("Transaction consumer interrupted - shutting down gracefully");
+                    break;
+                } catch (Exception e) {
+                    logger.warn("Kafka connection issue in transaction consumer: {}. Retrying...", e.getMessage());
+                    Platform.runLater(() -> {
+                        statusLabel.setText("Reconnecting...");
+                        statusLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #f39c12;");
+                    });
+                    
                     try {
-                        Transaction transaction = objectMapper.readValue(record.value(), Transaction.class);
-
-                        Platform.runLater(() -> {
-                            TransactionDisplayModel displayModel = new TransactionDisplayModel(transaction);
-                            transactions.add(0, displayModel); // Add at top
-
-                            // Keep only last 100 transactions
-                            if (transactions.size() > 100) {
-                                transactions.remove(transactions.size() - 1);
-                            }
-
-                            transactionCountLabel.setText("Transactions: " + transactionCount.incrementAndGet());
-                        });
-
-                    } catch (Exception e) {
-                        logger.error("Error parsing transaction", e);
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             }
         } catch (Exception e) {
-            logger.error("Error in transaction consumer", e);
+            logger.error("Fatal error in transaction consumer", e);
+        } finally {
+            logger.info("Transaction consumer thread stopped");
         }
     }
 

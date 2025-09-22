@@ -49,14 +49,17 @@ public class AlpacaTransactionSimulator {
     public void startSimulation() {
         logger.info("Starting Alpaca transaction simulation...");
 
-        // Normal transactions - every 1-5 seconds
-        executor.scheduleWithFixedDelay(this::generateNormalTransaction, 0, 2, TimeUnit.SECONDS);
+        // Normal transactions - every 5 seconds for easier debugging
+        logger.info("Generating normal transactions every 5 seconds");
+        executor.scheduleWithFixedDelay(this::generateNormalTransaction, 0, 5, TimeUnit.SECONDS);
 
-        // Suspicious transactions - occasionally
-        executor.scheduleWithFixedDelay(this::generateSuspiciousTransaction, 10, 30, TimeUnit.SECONDS);
+        // Suspicious transactions - less frequently for debugging
+        logger.info("Generating suspicious transactions every 60 seconds");
+        executor.scheduleWithFixedDelay(this::generateSuspiciousTransaction, 10, 60, TimeUnit.SECONDS);
 
-        // Burst of transactions to simulate rapid trading
-        executor.scheduleWithFixedDelay(this::generateBurstTransactions, 60, 120, TimeUnit.SECONDS);
+        // Burst of transactions - even less frequent for debugging
+        logger.info("Generating transaction bursts every 180 seconds");
+        executor.scheduleWithFixedDelay(this::generateBurstTransactions, 60, 180, TimeUnit.SECONDS);
 
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));

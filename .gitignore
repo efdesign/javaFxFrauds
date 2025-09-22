@@ -100,3 +100,12 @@ scripts/logs/
 # Test results
 test-results/
 reports/
+kafka-4.1.0.tgz
+
+# remove kafka files that come from unzipping the tar, keep customized configurations and other files changed after expanding the tar
+scripts/bin/
+scripts/libs/
+scripts/site-docs/**
+
+
+kafka/site-docs/kafka_2.13-4.1.0-site-docs.tgz
