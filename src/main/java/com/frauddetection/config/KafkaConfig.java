@@ -8,7 +8,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.util.Properties;
 
 public class KafkaConfig {
-    
+
     public static final String BOOTSTRAP_SERVERS = "localhost:9092";
     public static final String TRANSACTIONS_TOPIC = "transactions";
     public static final String FRAUD_ALERTS_TOPIC = "fraud-alerts";

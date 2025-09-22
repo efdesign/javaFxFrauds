@@ -20,7 +20,8 @@ if (Test-Path $processFile) {
             try {
                 Stop-Process -Id $processInfo.Kafka -Force -ErrorAction SilentlyContinue
                 Write-Host "✅ Kafka Server stopped" -ForegroundColor Green
-            } catch {
+            }
+            catch {
                 Write-Host "⚠️ Could not stop Kafka Server (may already be stopped)" -ForegroundColor Yellow
             }
         }
@@ -31,7 +32,8 @@ if (Test-Path $processFile) {
             try {
                 Stop-Process -Id $processInfo.ZooKeeper -Force -ErrorAction SilentlyContinue
                 Write-Host "✅ ZooKeeper stopped" -ForegroundColor Green
-            } catch {
+            }
+            catch {
                 Write-Host "⚠️ Could not stop ZooKeeper (may already be stopped)" -ForegroundColor Yellow
             }
         }
@@ -39,10 +41,12 @@ if (Test-Path $processFile) {
         # Remove process file
         Remove-Item $processFile -ErrorAction SilentlyContinue
         
-    } catch {
+    }
+    catch {
         Write-Host "❌ Error reading process file: $($_.Exception.Message)" -ForegroundColor Red
     }
-} else {
+}
+else {
     Write-Host "🔍 No process file found. Attempting to find and stop Kafka processes..." -ForegroundColor Yellow
     
     # Try to find and stop Kafka/ZooKeeper processes
@@ -55,11 +59,13 @@ if (Test-Path $processFile) {
             try {
                 Stop-Process -Id $process.Id -Force
                 Write-Host "✅ Stopped $($process.ProcessName)" -ForegroundColor Green
-            } catch {
+            }
+            catch {
                 Write-Host "⚠️ Could not stop $($process.ProcessName)" -ForegroundColor Yellow
             }
         }
-    } else {
+    }
+    else {
         Write-Host "ℹ️ No Kafka processes found running" -ForegroundColor Blue
     }
 }
@@ -77,7 +83,8 @@ if ($javaProcesses) {
         try {
             Stop-Process -Id $process.Id -Force
             Write-Host "✅ Stopped Java process" -ForegroundColor Green
-        } catch {
+        }
+        catch {
             Write-Host "⚠️ Could not stop Java process" -ForegroundColor Yellow
         }
     }

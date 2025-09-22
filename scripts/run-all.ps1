@@ -23,7 +23,8 @@ if (-not $SkipKafka) {
     # Wait a bit for Kafka to fully start
     Write-Host "⏱️ Waiting for Kafka to be fully ready..." -ForegroundColor Yellow
     Start-Sleep -Seconds 15
-} else {
+}
+else {
     Write-Host "⏭️ Skipping Kafka startup (assumed to be running)" -ForegroundColor Yellow
 }
 
@@ -39,7 +40,8 @@ Write-Host "✅ Build successful" -ForegroundColor Green
 if ($UIOnly) {
     Write-Host "🖥️ Starting UI only..." -ForegroundColor Magenta
     & .\gradlew runUI
-} else {
+}
+else {
     # Start all components in separate terminals
     Write-Host "🔄 Starting all components..." -ForegroundColor Blue
     
@@ -62,9 +64,9 @@ if ($UIOnly) {
     # Save job information for cleanup
     $jobInfo = @{
         FraudService = $fraudServiceJob.Id
-        Simulator = $simulatorJob.Id
-        UI = $uiJob.Id
-        StartTime = Get-Date
+        Simulator    = $simulatorJob.Id
+        UI           = $uiJob.Id
+        StartTime    = Get-Date
     } | ConvertTo-Json
     
     $jobInfo | Out-File -FilePath ".\scripts\app-processes.json" -Encoding UTF8

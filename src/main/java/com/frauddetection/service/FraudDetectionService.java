@@ -22,19 +22,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FraudDetectionService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(FraudDetectionService.class);
-    
+
     private final KafkaConsumer<String, String> consumer;
     private final KafkaProducer<String, String> producer;
     private final ObjectMapper objectMapper;
     private final AtomicBoolean running = new AtomicBoolean(true);
-    
+
     // Fraud detection state
     private final Map<String, List<Transaction>> accountTransactionHistory = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> lastTransactionTime = new ConcurrentHashMap<>();
     private final Set<String> flaggedAccounts = ConcurrentHashMap.newKeySet();
-    
+
     // Fraud detection thresholds
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("100000.00");
     private static final BigDecimal UNUSUAL_VALUE_THRESHOLD = new BigDecimal("50000.00");
@@ -48,10 +48,10 @@ public class FraudDetectionService {
         this.producer = new KafkaProducer<>(KafkaConfig.getProducerProps());
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
-        
+
         // Subscribe to transactions topic
         this.consumer.subscribe(Collections.singletonList(KafkaConfig.TRANSACTIONS_TOPIC));
-        
+
         // Cleanup old transaction history periodically
         Timer cleanupTimer = new Timer(true);
         cleanupTimer.scheduleAtFixedRate(new TimerTask() {
@@ -64,17 +64,17 @@ public class FraudDetectionService {
 
     public void start() {
         logger.info("Starting Fraud Detection Service...");
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
-        
+
         while (running.get()) {
             try {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-                
+
                 for (ConsumerRecord<String, String> record : records) {
                     processTransaction(record.value());
                 }
-                
+
             } catch (Exception e) {
                 logger.error("Error processing transactions", e);
                 if (!running.get()) {
@@ -88,7 +88,7 @@ public class FraudDetectionService {
                 }
             }
         }
-        
+
         logger.info("Fraud Detection Service stopped.");
     }
 
@@ -96,26 +96,26 @@ public class FraudDetectionService {
         try {
             Transaction transaction = objectMapper.readValue(transactionJson, Transaction.class);
             logger.debug("Processing transaction: {}", transaction.getTransactionId());
-            
+
             // Update transaction history
             updateTransactionHistory(transaction);
-            
+
             // Apply fraud detection rules
             List<FraudAlert> alerts = analyzeTransaction(transaction);
-            
+
             if (!alerts.isEmpty()) {
                 // Transaction is suspicious
                 for (FraudAlert alert : alerts) {
                     sendFraudAlert(alert);
                 }
-                logger.warn("Fraud detected for transaction {}: {} alerts generated", 
-                          transaction.getTransactionId(), alerts.size());
+                logger.warn("Fraud detected for transaction {}: {} alerts generated",
+                        transaction.getTransactionId(), alerts.size());
             } else {
                 // Transaction is valid
                 sendValidTransaction(transaction);
                 logger.debug("Transaction {} validated as legitimate", transaction.getTransactionId());
             }
-            
+
         } catch (Exception e) {
             logger.error("Error processing transaction JSON: {}", transactionJson, e);
         }
@@ -123,10 +123,10 @@ public class FraudDetectionService {
 
     private void updateTransactionHistory(Transaction transaction) {
         String accountId = transaction.getAccountId();
-        
+
         accountTransactionHistory.computeIfAbsent(accountId, k -> new ArrayList<>()).add(transaction);
         lastTransactionTime.put(accountId, transaction.getTimestamp());
-        
+
         // Keep only recent transactions (last hour) to prevent memory leak
         List<Transaction> accountHistory = accountTransactionHistory.get(accountId);
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
@@ -148,8 +148,8 @@ public class FraudDetectionService {
         }
 
         // Rule 2: Rapid Trading Detection
-        List<Transaction> recentTransactions = getRecentTransactions(transaction.getAccountId(), 
-                                                                    RAPID_TRADING_WINDOW_MINUTES);
+        List<Transaction> recentTransactions = getRecentTransactions(transaction.getAccountId(),
+                RAPID_TRADING_WINDOW_MINUTES);
         if (recentTransactions.size() >= RAPID_TRADING_THRESHOLD) {
             triggeredRules.add("RAPID_TRADING");
             riskScore = riskScore.add(new BigDecimal("0.3"));
@@ -178,24 +178,23 @@ public class FraudDetectionService {
         if (!triggeredRules.isEmpty()) {
             FraudAlert.SeverityLevel severity = determineSeverityLevel(riskScore);
             FraudAlert.FraudType fraudType = determineFraudType(triggeredRules);
-            
+
             String description = createAlertDescription(triggeredRules, transaction);
             String alertId = "ALERT-" + UUID.randomUUID().toString().substring(0, 8);
-            
+
             FraudAlert alert = new FraudAlert(
-                alertId, 
-                transaction.getTransactionId(),
-                transaction.getAccountId(),
-                fraudType,
-                description,
-                severity,
-                riskScore.min(BigDecimal.ONE), // Cap at 1.0
-                transaction,
-                triggeredRules
-            );
-            
+                    alertId,
+                    transaction.getTransactionId(),
+                    transaction.getAccountId(),
+                    fraudType,
+                    description,
+                    severity,
+                    riskScore.min(BigDecimal.ONE), // Cap at 1.0
+                    transaction,
+                    triggeredRules);
+
             alerts.add(alert);
-            
+
             // Flag account if high risk
             if (riskScore.compareTo(new BigDecimal("0.6")) >= 0) {
                 flaggedAccounts.add(transaction.getAccountId());
@@ -210,12 +209,12 @@ public class FraudDetectionService {
         if (accountHistory == null || accountHistory.isEmpty()) {
             return new ArrayList<>();
         }
-        
+
         LocalDateTime cutoff = LocalDateTime.now().minusMinutes(windowMinutes);
         return accountHistory.stream()
-            .filter(t -> t.getTimestamp().isAfter(cutoff))
-            .sorted((t1, t2) -> t2.getTimestamp().compareTo(t1.getTimestamp()))
-            .toList();
+                .filter(t -> t.getTimestamp().isAfter(cutoff))
+                .sorted((t1, t2) -> t2.getTimestamp().compareTo(t1.getTimestamp()))
+                .toList();
     }
 
     private boolean analyzeAccountPattern(Transaction current, List<Transaction> recent) {
@@ -226,11 +225,11 @@ public class FraudDetectionService {
         // Check for pump and dump pattern (rapid buy then sell of same symbol)
         long buyCount = recent.stream().filter(t -> "BUY".equals(t.getSide())).count();
         long sellCount = recent.stream().filter(t -> "SELL".equals(t.getSide())).count();
-        
+
         // Unusual trading pattern: all transactions same symbol with rapid buy/sell
         String currentSymbol = current.getSymbol();
         boolean allSameSymbol = recent.stream().allMatch(t -> currentSymbol.equals(t.getSymbol()));
-        
+
         return allSameSymbol && buyCount > 0 && sellCount > 0 && (buyCount + sellCount) >= 4;
     }
 
@@ -262,7 +261,7 @@ public class FraudDetectionService {
 
     private String createAlertDescription(List<String> rules, Transaction transaction) {
         StringBuilder desc = new StringBuilder("Suspicious activity detected: ");
-        
+
         if (rules.contains("HIGH_VALUE_TRANSACTION")) {
             desc.append("High-value transaction ($").append(transaction.getTotalValue()).append("). ");
         }
@@ -278,7 +277,7 @@ public class FraudDetectionService {
         if (rules.contains("PREVIOUSLY_FLAGGED_ACCOUNT")) {
             desc.append("Previously flagged account activity. ");
         }
-        
+
         return desc.toString().trim();
     }
 
@@ -286,21 +285,19 @@ public class FraudDetectionService {
         try {
             String json = objectMapper.writeValueAsString(alert);
             ProducerRecord<String, String> record = new ProducerRecord<>(
-                KafkaConfig.FRAUD_ALERTS_TOPIC,
-                alert.getAccountId(),
-                json
-            );
-            
+                    KafkaConfig.FRAUD_ALERTS_TOPIC,
+                    alert.getAccountId(),
+                    json);
+
             producer.send(record, (metadata, exception) -> {
                 if (exception != null) {
                     logger.error("Failed to send fraud alert: {}", alert.getAlertId(), exception);
                 } else {
-                    logger.warn("🚨 FRAUD ALERT: {} - {} (Risk: {}) - {}", 
-                        alert.getAlertId(), 
-                        alert.getFraudType(), 
-                        alert.getRiskScore(),
-                        alert.getDescription()
-                    );
+                    logger.warn("🚨 FRAUD ALERT: {} - {} (Risk: {}) - {}",
+                            alert.getAlertId(),
+                            alert.getFraudType(),
+                            alert.getRiskScore(),
+                            alert.getDescription());
                 }
             });
         } catch (Exception e) {
@@ -312,11 +309,10 @@ public class FraudDetectionService {
         try {
             String json = objectMapper.writeValueAsString(transaction);
             ProducerRecord<String, String> record = new ProducerRecord<>(
-                KafkaConfig.VALID_TRANSACTIONS_TOPIC,
-                transaction.getAccountId(),
-                json
-            );
-            
+                    KafkaConfig.VALID_TRANSACTIONS_TOPIC,
+                    transaction.getAccountId(),
+                    json);
+
             producer.send(record);
         } catch (Exception e) {
             logger.error("Error sending valid transaction to Kafka", e);
@@ -325,17 +321,15 @@ public class FraudDetectionService {
 
     private void cleanupOldTransactionHistory() {
         LocalDateTime twoHoursAgo = LocalDateTime.now().minusHours(2);
-        
+
         accountTransactionHistory.entrySet().removeIf(entry -> {
             List<Transaction> transactions = entry.getValue();
             transactions.removeIf(t -> t.getTimestamp().isBefore(twoHoursAgo));
             return transactions.isEmpty();
         });
-        
-        lastTransactionTime.entrySet().removeIf(entry -> 
-            entry.getValue().isBefore(twoHoursAgo)
-        );
-        
+
+        lastTransactionTime.entrySet().removeIf(entry -> entry.getValue().isBefore(twoHoursAgo));
+
         logger.debug("Cleaned up old transaction history");
     }
 

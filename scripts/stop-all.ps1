@@ -30,7 +30,8 @@ if (Test-Path $processFile) {
                 try {
                     Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
                     Write-Host "✅ $($proc.Name) stopped" -ForegroundColor Green
-                } catch {
+                }
+                catch {
                     Write-Host "⚠️ Could not stop $($proc.Name) (may already be stopped)" -ForegroundColor Yellow
                 }
             }
@@ -39,10 +40,12 @@ if (Test-Path $processFile) {
         # Remove process file
         Remove-Item $processFile -ErrorAction SilentlyContinue
         
-    } catch {
+    }
+    catch {
         Write-Host "❌ Error reading process file: $($_.Exception.Message)" -ForegroundColor Red
     }
-} else {
+}
+else {
     Write-Host "🔍 No app process file found. Attempting to find and stop related processes..." -ForegroundColor Yellow
     
     # Try to find and stop Java processes related to our app
@@ -60,7 +63,8 @@ if (Test-Path $processFile) {
             try {
                 Stop-Process -Id $process.Id -Force
                 Write-Host "✅ Stopped application process" -ForegroundColor Green
-            } catch {
+            }
+            catch {
                 Write-Host "⚠️ Could not stop application process" -ForegroundColor Yellow
             }
         }

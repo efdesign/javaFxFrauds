@@ -37,7 +37,8 @@ if (-not (Test-Path $KAFKA_DIR)) {
     $tarFile = "$KAFKA_DIR.tgz"
     if (Get-Command curl -ErrorAction SilentlyContinue) {
         curl -L -o $tarFile $KAFKA_URL
-    } else {
+    }
+    else {
         # Fallback to PowerShell's Invoke-WebRequest
         Invoke-WebRequest -Uri $KAFKA_URL -OutFile $tarFile
     }
@@ -47,7 +48,8 @@ if (-not (Test-Path $KAFKA_DIR)) {
     # Extract tar.gz file (requires tar command on Windows 10+)
     if (Get-Command tar -ErrorAction SilentlyContinue) {
         tar -xzf $tarFile
-    } else {
+    }
+    else {
         Write-Error "tar command not found. Please ensure you're running Windows 10+ or install tar utility."
         exit 1
     }
@@ -112,7 +114,7 @@ Write-Host ""
 # Save process IDs for cleanup
 $processInfo = @{
     ZooKeeper = $zookeeperProcess.Id
-    Kafka = $kafkaProcess.Id
+    Kafka     = $kafkaProcess.Id
     StartTime = Get-Date
 } | ConvertTo-Json
 

@@ -21,24 +21,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AlpacaTransactionSimulator {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AlpacaTransactionSimulator.class);
-    
+
     private final KafkaProducer<String, String> producer;
     private final ObjectMapper objectMapper;
     private final Random random;
     private final ScheduledExecutorService executor;
-    
+
     // Simulated stock symbols
     private final List<String> symbols = Arrays.asList(
-        "AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "NVDA", "META", "NFLX", "BABA", "AMD",
-        "INTC", "CRM", "ORCL", "ADBE", "PYPL", "UBER", "LYFT", "SPOT", "ZOOM", "SQ"
-    );
-    
+            "AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "NVDA", "META", "NFLX", "BABA", "AMD",
+            "INTC", "CRM", "ORCL", "ADBE", "PYPL", "UBER", "LYFT", "SPOT", "ZOOM", "SQ");
+
     // Simulated account IDs
     private final List<String> accountIds = Arrays.asList(
-        "ACC001", "ACC002", "ACC003", "ACC004", "ACC005", "ACC006", "ACC007", "ACC008", "ACC009", "ACC010"
-    );
+            "ACC001", "ACC002", "ACC003", "ACC004", "ACC005", "ACC006", "ACC007", "ACC008", "ACC009", "ACC010");
 
     public AlpacaTransactionSimulator() {
         this.producer = new KafkaProducer<>(KafkaConfig.getProducerProps());
@@ -50,19 +48,19 @@ public class AlpacaTransactionSimulator {
 
     public void startSimulation() {
         logger.info("Starting Alpaca transaction simulation...");
-        
+
         // Normal transactions - every 1-5 seconds
         executor.scheduleWithFixedDelay(this::generateNormalTransaction, 0, 2, TimeUnit.SECONDS);
-        
+
         // Suspicious transactions - occasionally
         executor.scheduleWithFixedDelay(this::generateSuspiciousTransaction, 10, 30, TimeUnit.SECONDS);
-        
+
         // Burst of transactions to simulate rapid trading
         executor.scheduleWithFixedDelay(this::generateBurstTransactions, 60, 120, TimeUnit.SECONDS);
-        
+
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
-        
+
         logger.info("Transaction simulation started. Press Ctrl+C to stop.");
     }
 
@@ -70,7 +68,7 @@ public class AlpacaTransactionSimulator {
         try {
             Transaction transaction = createRandomTransaction(false);
             sendTransaction(transaction);
-            
+
             // Add some randomness to timing
             if (random.nextBoolean()) {
                 Thread.sleep(random.nextInt(3000) + 500);
@@ -95,10 +93,10 @@ public class AlpacaTransactionSimulator {
             int burstCount = random.nextInt(5) + 3; // 3-7 transactions
             String accountId = accountIds.get(random.nextInt(accountIds.size()));
             String symbol = symbols.get(random.nextInt(symbols.size()));
-            
-            logger.info("Generating burst of {} transactions for account {} trading {}", 
-                       burstCount, accountId, symbol);
-            
+
+            logger.info("Generating burst of {} transactions for account {} trading {}",
+                    burstCount, accountId, symbol);
+
             for (int i = 0; i < burstCount; i++) {
                 Transaction transaction = createBurstTransaction(accountId, symbol);
                 sendTransaction(transaction);
@@ -114,11 +112,11 @@ public class AlpacaTransactionSimulator {
         String accountId = accountIds.get(random.nextInt(accountIds.size()));
         String symbol = symbols.get(random.nextInt(symbols.size()));
         String side = random.nextBoolean() ? "BUY" : "SELL";
-        
+
         BigDecimal basePrice = getBasePrice(symbol);
         BigDecimal price = basePrice.add(new BigDecimal(random.nextGaussian() * 5.0))
-                                  .setScale(2, RoundingMode.HALF_UP);
-        
+                .setScale(2, RoundingMode.HALF_UP);
+
         BigDecimal quantity;
         if (makeSuspicious) {
             // Make suspicious: either very high volume or very high value
@@ -131,9 +129,9 @@ public class AlpacaTransactionSimulator {
         } else {
             quantity = new BigDecimal(random.nextInt(1000) + 1);
         }
-        
+
         LocalDateTime timestamp = LocalDateTime.now();
-        
+
         // Make some transactions outside normal trading hours if suspicious
         if (makeSuspicious && random.nextBoolean()) {
             int hour = random.nextBoolean() ? random.nextInt(9) + 1 : random.nextInt(7) + 17; // 1-9 AM or 5-11 PM
@@ -148,7 +146,7 @@ public class AlpacaTransactionSimulator {
         String side = random.nextBoolean() ? "BUY" : "SELL";
         BigDecimal basePrice = getBasePrice(symbol);
         BigDecimal price = basePrice.add(new BigDecimal(random.nextGaussian() * 2.0))
-                                  .setScale(2, RoundingMode.HALF_UP);
+                .setScale(2, RoundingMode.HALF_UP);
         BigDecimal quantity = new BigDecimal(random.nextInt(500) + 10);
         LocalDateTime timestamp = LocalDateTime.now();
 
@@ -174,23 +172,21 @@ public class AlpacaTransactionSimulator {
         try {
             String json = objectMapper.writeValueAsString(transaction);
             ProducerRecord<String, String> record = new ProducerRecord<>(
-                KafkaConfig.TRANSACTIONS_TOPIC, 
-                transaction.getAccountId(), 
-                json
-            );
-            
+                    KafkaConfig.TRANSACTIONS_TOPIC,
+                    transaction.getAccountId(),
+                    json);
+
             producer.send(record, (metadata, exception) -> {
                 if (exception != null) {
                     logger.error("Failed to send transaction: {}", transaction.getTransactionId(), exception);
                 } else {
-                    logger.info("Sent transaction: {} - {} {} {}@${} (total: ${})", 
-                        transaction.getTransactionId(),
-                        transaction.getSide(),
-                        transaction.getQuantity(),
-                        transaction.getSymbol(),
-                        transaction.getPrice(),
-                        transaction.getTotalValue()
-                    );
+                    logger.info("Sent transaction: {} - {} {} {}@${} (total: ${})",
+                            transaction.getTransactionId(),
+                            transaction.getSide(),
+                            transaction.getQuantity(),
+                            transaction.getSymbol(),
+                            transaction.getPrice(),
+                            transaction.getTotalValue());
                 }
             });
         } catch (Exception e) {
@@ -215,7 +211,7 @@ public class AlpacaTransactionSimulator {
     public static void main(String[] args) {
         AlpacaTransactionSimulator simulator = new AlpacaTransactionSimulator();
         simulator.startSimulation();
-        
+
         // Keep the main thread alive
         try {
             Thread.currentThread().join();
