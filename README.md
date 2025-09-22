@@ -1,10 +1,11 @@
-# Real-Time Fraud Detection with JavaFX & Kafka
+# Real-Time Fraud Detection with JavaFX & Kafka (interview demo app)
 
 A distributed fraud detection system that simulates Alpaca stock transactions and detects fraudulent patterns in real-time using Kafka and JavaFX.
 
 ## 🎬 Demo Video
 
-https://github.com/efdesign/javaFxFrauds/blob/master/docs/fxRealtime.mp4
+https://github.com/user-attachments/assets/8f7927f7-3de6-4451-bd02-73b3761c3e1c
+
 
 _Watch the system in action: real-time transaction processing, fraud detection, and live UI updates_
 
