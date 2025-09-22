@@ -4,7 +4,7 @@ A distributed fraud detection system that simulates Alpaca stock transactions an
 
 ## 🎬 Demo Video
 
-https://github.com/efdesign/javaFxFrauds/blob/master/docs/fxRealtime.mp4
+![video](docs/fxRealtime.mp4)
 
 *Watch the system in action: real-time transaction processing, fraud detection, and live UI updates*
 
