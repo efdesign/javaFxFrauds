@@ -22,28 +22,55 @@ This document provides standardized instructions for AI systems (GitHub Copilot,
 
 ## 📋 Documentation Standards
 
+### Documentation File Organization
+
+**LOCATION**: All documentation files **MUST** be placed in the `docs/` folder
+
+**STRUCTURE**:
+
+```
+project-root/
+├── README.md           # Main project README (stays in root)
+├── docs/              # All other documentation goes here
+│   ├── 1.0.0-release-notes.md
+│   ├── 1.0.0-project-status.md
+│   ├── 1.0.1-memory-analysis.md
+│   └── 1.2.0-architecture-updates.md
+└── [other project files]
+```
+
 ### Markdown File Naming Convention
 
-All documentation files **MUST** follow semantic versioning pattern:
+All documentation files **MUST** follow this exact pattern:
 
 ```
-{major}.{minor}.{patch}.{description}.md
+docs/{major}.{minor}.{patch}-{description}.md
 ```
+
+**Key Rules**:
+
+- **Version first**: Start with version number (e.g., `1.0.1-`)
+- **Lowercase description**: Use lowercase with hyphens (e.g., `-memory-analysis`)
+- **Descriptive suffix**: Clear, concise description of content
+- **Location**: Always in `docs/` folder (except README.md)
 
 **Examples:**
 
-- `0.0.0.guidelines.md` - Initial project guidelines
-- `1.0.0.plan.md` - Master project plan (IMMUTABLE)
-- `1.1.0.architecture.md` - Architecture documentation
-- `2.0.0.deployment.md` - Deployment procedures
-- `1.0.1.plan-amendments.md` - Plan amendments (never modify original plan)
+- `docs/1.0.0-release-notes.md` - Release documentation
+- `docs/1.0.0-project-status.md` - Current project state
+- `docs/1.0.1-memory-analysis.md` - Memory usage analysis
+- `docs/1.1.0-architecture-updates.md` - Architecture changes
+- `docs/2.0.0-deployment-guide.md` - Deployment procedures
+- `docs/1.0.2-performance-benchmarks.md` - Performance analysis
 
 ### Documentation Rules
 
-1. **Master Plan (1.0.0.plan.md)**: NEVER modify once created. Follow strictly.
-2. **Amendments**: Create new versioned files for changes (e.g., `1.0.1.plan-amendments.md`)
-3. **Sequential Updates**: Always increment version numbers for documentation updates
-4. **Descriptive Names**: Use clear, descriptive names in the file suffix
+1. **Location**: All docs in `docs/` folder (README.md stays in root)
+2. **Version Format**: `{version}-{description}.md` (version first, lowercase description)
+3. **Master Documents**: Mark critical docs as IMMUTABLE in header
+4. **Amendments**: Create new versioned files for major changes
+5. **Sequential Updates**: Always increment version numbers for updates
+6. **Descriptive Names**: Use clear, descriptive names with hyphens
 
 ## 🔄 Git Workflow & Version Control
 
@@ -66,7 +93,7 @@ feat: implement real-time transaction processing
 - Add JavaFX UI for real-time monitoring
 
 Tests: ✅ All unit and e2e tests passing
-Docs: 2.1.0.implementation-log.md
+Docs: docs/2.1.0-implementation-log.md
 ```
 
 ### Documentation Commit Example
@@ -78,7 +105,7 @@ docs: add implementation log v2.1.0
 - Update architecture decisions
 - Record performance benchmarks
 
-File: 2.1.0.implementation-log.md
+File: docs/2.1.0-implementation-log.md
 ```
 
 ## 🚀 Server & Script Requirements
