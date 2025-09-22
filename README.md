@@ -2,6 +2,12 @@
 
 A distributed fraud detection system that simulates Alpaca stock transactions and detects fraudulent patterns in real-time using Kafka and JavaFX.
 
+## 🎬 Demo Video
+
+https://github.com/user-attachments/assets/fxRealtime.mp4
+
+*Watch the system in action: real-time transaction processing, fraud detection, and live UI updates*
+
 ## Architecture
 
 ```
@@ -42,3 +48,11 @@ Alpaca Simulator → Kafka (transactions) → Fraud Detection Service → Kafka 
 - Rapid successive trades from same account
 - Unusual trading hours (outside 9:30 AM - 4:00 PM EST)
 - Price manipulation patterns
+
+## 📁 Documentation
+
+For detailed system documentation, see the [`docs/`](./docs/) folder:
+
+- [`docs/1.0.0-release-notes.md`](./docs/1.0.0-release-notes.md) - Complete system documentation and setup guide
+- [`docs/1.0.0-project-status.md`](./docs/1.0.0-project-status.md) - Current project status and achievements
+- [`docs/1.0.1-memory-analysis.md`](./docs/1.0.1-memory-analysis.md) - Memory usage analysis and optimization guide
