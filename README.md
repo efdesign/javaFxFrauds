@@ -2,7 +2,7 @@
 
 A distributed fraud detection system that simulates Alpaca stock transactions and detects fraudulent patterns in real-time using Kafka and JavaFX.
 
-## 🎬 Demo Video
+## 🎬 Demo Video (download if the preview is not visible)
 
 https://github.com/user-attachments/assets/8f7927f7-3de6-4451-bd02-73b3761c3e1c
 
